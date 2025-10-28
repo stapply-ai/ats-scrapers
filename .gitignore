@@ -13,4 +13,7 @@ wheels/
 .cursor
 .vscode
 
-**/*.json
+# ashby/*.json
+greenhouse/**/*.json
+lever/**/*.json
+workable/**/*.json
