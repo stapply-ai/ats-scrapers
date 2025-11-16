@@ -56,6 +56,43 @@ GOOGLE_CSE_ID=your_cse_id         # Google CSE ID
 BING_API_KEY=your_bing_key        # Bing (FREE 1,000/mo)
 ```
 
+## Pipeline Orchestrator (Recommended)
+
+**NEW!** Unified pipeline to run the full workflow with configurable steps.
+
+**Default behavior:** Scraping + CSV Consolidation + Export (skips discovery and DB processing)
+
+### Quick Start
+
+```bash
+# Default: scraping + CSV consolidation (most common use case)
+python orchestrator/pipeline.py
+
+# Run full pipeline including discovery and DB processing
+python orchestrator/pipeline.py --all
+
+# Discovery only with SearXNG (FREE unlimited!)
+python orchestrator/pipeline.py --discovery-only --discovery-method searxng --max-queries 30
+```
+
+### Pipeline Steps
+
+1. **Discovery** - Find companies using search APIs (SearXNG, Google CSE, Firecrawl, SERP API)
+2. **Scraping** - Fetch jobs from each company via ATS APIs
+3. **CSV Consolidation** - Create simplified `all_jobs.csv` (url, title, location, company)
+4. **DB Processing** - Save to PostgreSQL with embeddings (Ashby only currently)
+5. **Export** - Export final data
+
+### Benefits
+
+- ✅ Coordinated workflow across all platforms
+- ✅ Skip any step as needed
+- ✅ Automatic error handling
+- ✅ Progress tracking and summaries
+- ✅ Simple CSV output for easy review
+
+**See [orchestrator/README.md](orchestrator/README.md) for full documentation.**
+
 ## Company Discovery
 
 Find more companies using different ATS platforms.
@@ -237,6 +274,12 @@ data/
 │   ├── gh.py                      # Greenhouse models
 │   ├── lever.py                   # Lever models
 │   └── workable.py                # Workable models
+├── orchestrator/                   # Pipeline orchestrator (NEW!)
+│   ├── __init__.py                # Package init
+│   ├── config.py                  # Pipeline configuration
+│   ├── pipeline.py                # Main orchestrator
+│   ├── consolidate_jobs.py        # CSV consolidation script
+│   └── README.md                  # Orchestrator documentation
 ├── enhanced_discovery.py           # 55+ search strategies (recommended)
 ├── searxng_discovery.py            # SearXNG self-hosted search (FREE unlimited!)
 ├── firecrawl_discovery.py          # Firecrawl search API (SERP alternative)
@@ -247,9 +290,9 @@ data/
 
 ## Documentation
 
+- **[orchestrator/README.md](orchestrator/README.md)** - Pipeline orchestrator full documentation
 - **[SEARXNG_SETUP.md](SEARXNG_SETUP.md)** - Complete guide to setting up SearXNG (self-hosted search)
 - **[DISCOVERY_QUICK_START.md](DISCOVERY_QUICK_START.md)** - Quick reference for company discovery
-- **[SERP_ALTERNATIVES.md](SERP_ALTERNATIVES.md)** - Comparison of SERP API providers and costs
 - **[IMPROVEMENTS.md](IMPROVEMENTS.md)** - Code quality improvements and recommendations
 
 ## Discovery Cost Comparison
