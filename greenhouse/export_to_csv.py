@@ -9,35 +9,38 @@ def main():
 
     job_rows = []
 
-    for filename in os.listdir(companies_dir):
-        if filename.endswith(".json"):
-            company_name = os.path.splitext(filename)[0]
-            json_path = os.path.join(companies_dir, filename)
-            with open(json_path, "r", encoding="utf-8") as f:
-                try:
-                    data = json.load(f)
-                except Exception:
-                    # skip files that are not valid JSON
-                    continue
+    if not os.path.exists(companies_dir) or not os.path.isdir(companies_dir):
+        print(f"Companies directory does not exist: {companies_dir}")
+    else:
+        for filename in os.listdir(companies_dir):
+            if filename.endswith(".json"):
+                company_name = os.path.splitext(filename)[0]
+                json_path = os.path.join(companies_dir, filename)
+                with open(json_path, "r", encoding="utf-8") as f:
+                    try:
+                        data = json.load(f)
+                    except Exception:
+                        # skip files that are not valid JSON
+                        continue
 
-                # Greenhouse structure: jobs are always under "jobs" key
-                jobs = data.get("jobs", [])
-                if not isinstance(jobs, list):
-                    continue
+                    # Greenhouse structure: jobs are always under "jobs" key
+                    jobs = data.get("jobs", [])
+                    if not isinstance(jobs, list):
+                        continue
 
-                for job in jobs:
-                    # Greenhouse uses absolute_url, not url or jobUrl
-                    url = job.get("absolute_url", "")
-                    title = job.get("title", "")
+                    for job in jobs:
+                        # Greenhouse uses absolute_url, not url or jobUrl
+                        url = job.get("absolute_url", "")
+                        title = job.get("title", "")
 
-                    # Greenhouse location is a dict with "name" key
-                    location = job.get("location", {})
-                    if isinstance(location, dict):
-                        location_str = location.get("name", "")
-                    else:
-                        location_str = str(location)
+                        # Greenhouse location is a dict with "name" key
+                        location = job.get("location", {})
+                        if isinstance(location, dict):
+                            location_str = location.get("name", "")
+                        else:
+                            location_str = str(location)
 
-                    job_rows.append([url, title, location_str, company_name])
+                        job_rows.append([url, title, location_str, company_name])
 
     print(f"Processed {len(job_rows)} total jobs")
 

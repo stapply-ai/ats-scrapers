@@ -9,36 +9,41 @@ def main():
 
     job_rows = []
 
-    for filename in os.listdir(companies_dir):
-        if filename.endswith(".json"):
-            company_name = os.path.splitext(filename)[0]
-            json_path = os.path.join(companies_dir, filename)
-            with open(json_path, "r", encoding="utf-8") as f:
-                try:
-                    data = json.load(f)
-                except Exception:
-                    # skip files that are not valid JSON
-                    continue
+    if not os.path.exists(companies_dir) or not os.path.isdir(companies_dir):
+        print(f"Companies directory does not exist: {companies_dir}")
+    else:
+        for filename in os.listdir(companies_dir):
+            if filename.endswith(".json"):
+                company_name = os.path.splitext(filename)[0]
+                json_path = os.path.join(companies_dir, filename)
+                with open(json_path, "r", encoding="utf-8") as f:
+                    try:
+                        data = json.load(f)
+                    except Exception:
+                        # skip files that are not valid JSON
+                        continue
 
-                # Lever returns a list directly, or under "postings" key
-                job_list = data if isinstance(data, list) else data.get("postings", [])
-                if not isinstance(job_list, list):
-                    continue
+                    # Lever returns a list directly, or under "postings" key
+                    job_list = (
+                        data if isinstance(data, list) else data.get("postings", [])
+                    )
+                    if not isinstance(job_list, list):
+                        continue
 
-                for job in job_list:
-                    # Lever uses hostedUrl (with fallback to applyUrl), not url
-                    url = job.get("hostedUrl", job.get("applyUrl", ""))
-                    # Lever uses "text" for title, not "title"
-                    title = job.get("text", "")
+                    for job in job_list:
+                        # Lever uses hostedUrl (with fallback to applyUrl), not url
+                        url = job.get("hostedUrl", job.get("applyUrl", ""))
+                        # Lever uses "text" for title, not "title"
+                        title = job.get("text", "")
 
-                    # Lever location is a dict with "name" key
-                    location = job.get("location", {})
-                    if isinstance(location, dict):
-                        location_str = location.get("name", "")
-                    else:
-                        location_str = str(location)
+                        # Lever location is a dict with "name" key
+                        location = job.get("location", {})
+                        if isinstance(location, dict):
+                            location_str = location.get("name", "")
+                        else:
+                            location_str = str(location)
 
-                    job_rows.append([url, title, location_str, company_name])
+                        job_rows.append([url, title, location_str, company_name])
 
     print(f"Processed {len(job_rows)} total jobs")
 

@@ -9,35 +9,38 @@ def main():
 
     job_rows = []
 
-    for filename in os.listdir(companies_dir):
-        if filename.endswith(".json"):
-            company_name = os.path.splitext(filename)[0]
-            json_path = os.path.join(companies_dir, filename)
-            with open(json_path, "r", encoding="utf-8") as f:
-                try:
-                    data = json.load(f)
-                except Exception:
-                    # skip files that are not valid JSON
-                    continue
+    if not os.path.exists(companies_dir) or not os.path.isdir(companies_dir):
+        print(f"Companies directory does not exist: {companies_dir}")
+    else:
+        for filename in os.listdir(companies_dir):
+            if filename.endswith(".json"):
+                company_name = os.path.splitext(filename)[0]
+                json_path = os.path.join(companies_dir, filename)
+                with open(json_path, "r", encoding="utf-8") as f:
+                    try:
+                        data = json.load(f)
+                    except Exception:
+                        # skip files that are not valid JSON
+                        continue
 
-                # Workable structure: jobs can be a list directly, or under "jobs" key
-                job_list = data if isinstance(data, list) else data.get("jobs", [])
-                if not isinstance(job_list, list):
-                    continue
+                    # Workable structure: jobs can be a list directly, or under "jobs" key
+                    job_list = data if isinstance(data, list) else data.get("jobs", [])
+                    if not isinstance(job_list, list):
+                        continue
 
-                for job in job_list:
-                    # Workable uses "url" (simple field name)
-                    url = job.get("url", "")
-                    title = job.get("title", "")
+                    for job in job_list:
+                        # Workable uses "url" (simple field name)
+                        url = job.get("url", "")
+                        title = job.get("title", "")
 
-                    # Workable location is a dict with "city" key (not "name")
-                    location = job.get("location", {})
-                    if isinstance(location, dict):
-                        location_str = location.get("city", "")
-                    else:
-                        location_str = str(location)
+                        # Workable location is a dict with "city" key (not "name")
+                        location = job.get("location", {})
+                        if isinstance(location, dict):
+                            location_str = location.get("city", "")
+                        else:
+                            location_str = str(location)
 
-                    job_rows.append([url, title, location_str, company_name])
+                        job_rows.append([url, title, location_str, company_name])
 
     print(f"Processed {len(job_rows)} total jobs")
 
