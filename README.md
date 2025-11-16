@@ -50,10 +50,11 @@ OPENAI_API_KEY=sk-...
 # Required for company discovery
 SERPAPI_API_KEY=your_serpapi_key
 
-# Optional: Free alternatives for company discovery
-GOOGLE_API_KEY=your_google_api_key
-GOOGLE_CSE_ID=your_custom_search_engine_id
-BING_API_KEY=your_bing_api_key
+# Optional: Alternative discovery methods (cheaper/free)
+FIRECRAWL_API_KEY=fc-your_key  # Firecrawl (500 free, $16/mo)
+GOOGLE_API_KEY=your_google_key # Google (FREE 100/day)
+GOOGLE_CSE_ID=your_cse_id      # Google CSE ID
+BING_API_KEY=your_bing_key     # Bing (FREE 1,000/mo)
 ```
 
 ## Company Discovery
@@ -99,7 +100,28 @@ python google_custom_search.py --platform ashby --max-queries 100
 
 **Cost:** FREE for first 100 queries/day, then $5 per 1,000 queries
 
-### Option 3: Optimized Discovery (Minimal Cost)
+### Option 3: Firecrawl Discovery (SERP Alternative)
+
+Use Firecrawl's search endpoint as an alternative to SERP API:
+
+```bash
+# Setup: Get API key from https://firecrawl.dev/ (500 free credits)
+
+# Discover using Firecrawl search
+python firecrawl_discovery.py --platform all --max-queries 15
+
+# Discover specific platform
+python firecrawl_discovery.py --platform ashby --max-queries 20
+```
+
+**Advantages:**
+- Returns full content (not just snippets like Google)
+- Combined search + scrape in one call
+- Cheaper than SERP API ($16/mo vs $50/mo)
+- 500 free credits to start (no credit card)
+- 2 credits per 10 search results
+
+### Option 4: Optimized Discovery (Minimal Cost)
 
 Minimize SERP API costs with query caching and smart strategies:
 
@@ -189,6 +211,7 @@ data/
 │   ├── lever.py                   # Lever models
 │   └── workable.py                # Workable models
 ├── enhanced_discovery.py           # 55+ search strategies (recommended)
+├── firecrawl_discovery.py          # Firecrawl search API (SERP alternative)
 ├── google_custom_search.py         # Free Google API discovery
 ├── optimized_serp_discovery.py     # Cost-optimized SERP discovery
 └── alternative_discovery.py        # Alternative discovery methods
@@ -205,6 +228,7 @@ data/
 | Method | Cost | Companies Found | Setup Time |
 |--------|------|----------------|------------|
 | **Enhanced Discovery** | $5-20/run | 500-2,000 | 0 min |
+| **Firecrawl Discovery** | $0-3/run | 300-800 | 5 min |
 | **Google Custom Search** | FREE (100/day) | 500-1,000 | 5 min |
 | **Optimized Discovery** | $2-5/run | 500-1,000 | 0 min |
 | **Manual Curation** | FREE | 500-1,000 | 30-60 min |
@@ -248,7 +272,7 @@ Visit YC directory, BuiltIn, etc.
 - **SQLAlchemy** - Database ORM
 - **PostgreSQL** - Data storage
 - **OpenAI API** - Text embeddings for semantic search
-- **SERP API / Google Custom Search** - Company discovery
+- **SERP API / Google Custom Search / Firecrawl** - Company discovery
 - **pandas** - Data processing
 - **BeautifulSoup** - HTML parsing (if needed)
 
@@ -259,6 +283,7 @@ Visit YC directory, BuiltIn, etc.
 | `DATABASE_URL` | For job processing | PostgreSQL connection string |
 | `OPENAI_API_KEY` | For embeddings | OpenAI API key for semantic search |
 | `SERPAPI_API_KEY` | For discovery | SerpAPI key for company discovery |
+| `FIRECRAWL_API_KEY` | Optional | Firecrawl API (500 free credits, $16/mo) |
 | `GOOGLE_API_KEY` | Optional | Google Custom Search API (FREE tier) |
 | `GOOGLE_CSE_ID` | Optional | Custom Search Engine ID |
 | `BING_API_KEY` | Optional | Bing Search API (FREE tier) |
