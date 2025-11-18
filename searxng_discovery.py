@@ -1,20 +1,18 @@
 """
 SearXNG-Based Company Discovery
-FREE self-hosted search alternative - NO API costs or limits!
+Self-hosted search alternative with no API limits.
 
 Advantages:
-- Completely FREE (self-hosted)
+- Self-hosted control
 - No API limits or rate limiting
 - No API keys needed
 - Privacy-focused
 - Aggregates results from multiple search engines
-- No usage tracking or costs
+- No usage tracking
 
 Requirements:
 - SearXNG instance running (see SEARXNG_SETUP.md)
 - SEARXNG_URL in .env pointing to your instance
-
-Pricing: $0 (self-hosted)
 """
 
 import requests
@@ -130,17 +128,32 @@ SEARCH_STRATEGIES = [
 ]
 
 
+def normalize_url(url: str) -> str:
+    """Normalize URLs for case-insensitive comparisons"""
+    if not isinstance(url, str):
+        return ""
+    return url.strip().rstrip("/").lower()
+
+
 def read_existing_urls(csv_file: str, column_name: str) -> Set[str]:
     """Read existing URLs from CSV file"""
-    existing_urls = set()
+    existing_urls: Set[str] = set()
     if os.path.exists(csv_file):
         try:
             df = pd.read_csv(csv_file)
             if column_name in df.columns:
-                existing_urls = set(df[column_name].dropna().tolist())
+                existing_urls = {
+                    normalize_url(url)
+                    for url in df[column_name].dropna().tolist()
+                    if normalize_url(url)
+                }
                 print(f"📖 Found {len(existing_urls)} existing URLs in {csv_file}")
             elif "url" in df.columns:
-                existing_urls = set(df["url"].dropna().tolist())
+                existing_urls = {
+                    normalize_url(url)
+                    for url in df["url"].dropna().tolist()
+                    if normalize_url(url)
+                }
                 print(
                     f"📖 Found {len(existing_urls)} existing URLs in {csv_file} (legacy format)"
                 )
@@ -274,15 +287,17 @@ def discover_platform(
         engines: Search engines to use (default: google,duckduckgo,bing)
     """
 
-    if platform_name not in PLATFORMS:
+    platform_key = platform_name.lower()
+
+    if platform_key not in PLATFORMS:
         print(f"❌ Unknown platform: {platform_name}")
         print(f"Available platforms: {', '.join(PLATFORMS.keys())}")
         return
 
-    config = PLATFORMS[platform_name]
+    config = PLATFORMS[platform_key]
 
     print("=" * 80)
-    print(f"🔍 SearXNG Discovery: {platform_name.upper()}")
+    print(f"🔍 SearXNG Discovery: {platform_key.upper()}")
     print(f"📊 Max queries: {max_queries}")
     print(f"📊 Pages per query: {pages_per_query}")
     print(f"🔧 Engines: {engines}")
@@ -298,7 +313,6 @@ def discover_platform(
         print("   SEARXNG_URL=http://localhost:8080")
         print("\nOr use a public instance (if available):")
         print("   SEARXNG_URL=https://searx.be")
-        print("\n💰 Cost: $0 (self-hosted, no limits!)")
         return
 
     # Test SearXNG connection
@@ -329,7 +343,8 @@ def discover_platform(
     # Read existing URLs
     existing_urls = read_existing_urls(config["output_file"], config["csv_column"])
 
-    all_urls = set()
+    discovered_norms = set()
+    new_urls: Set[str] = set()
     queries_used = 0
     total_results_fetched = 0
 
@@ -350,7 +365,7 @@ def discover_platform(
             f"\n[Query {queries_used + 1}/{max_queries if max_queries != -1 else 'unlimited'}] {query}"
         )
 
-        query_urls = set()
+        query_norms = set()
 
         for page in range(1, pages_per_query + 1):
             try:
@@ -368,8 +383,15 @@ def discover_platform(
                     results, config["pattern"], config["domains"]
                 )
 
-                new_in_page = page_urls - all_urls - query_urls
-                query_urls.update(page_urls)
+                normalized_page_urls = {
+                    normalize_url(url) for url in page_urls if normalize_url(url)
+                }
+
+                new_in_page = normalized_page_urls - discovered_norms - query_norms
+                query_norms.update(normalized_page_urls)
+
+                new_candidates = normalized_page_urls - existing_urls - new_urls
+                new_urls.update(new_candidates)
 
                 print(
                     f"  Page {page}: {len(results)} results, {len(page_urls)} relevant URLs (+{len(new_in_page)} new)"
@@ -383,11 +405,11 @@ def discover_platform(
                 break
 
         queries_used += 1
-        new_from_query = query_urls - all_urls
-        all_urls.update(query_urls)
+        new_from_query = query_norms - discovered_norms
+        discovered_norms.update(query_norms)
 
         print(
-            f"  Query total: +{len(new_from_query)} new URLs (cumulative: {len(all_urls)})"
+            f"  Query total: +{len(new_from_query)} new URLs (cumulative: {len(discovered_norms)})"
         )
 
         # Delay between queries to avoid rate limiting
@@ -396,26 +418,25 @@ def discover_platform(
                 3.0
             )  # 3 seconds between queries to avoid "too many requests" errors
 
-    # Cost calculation (always $0 for self-hosted)
-    print(f"\n📊 Discovery Summary:")
+    print("\n📊 Discovery Summary:")
     print(f"  🔍 Queries used: {queries_used}")
     print(f"  📄 Total results fetched: {total_results_fetched}")
-    print(f"  💰 Cost: $0 (self-hosted, unlimited!)")
-    print(f"  🔍 Companies found: {len(all_urls)}")
-    print(f"  🆕 New companies: {len(all_urls - existing_urls)}")
+    new_count = len(new_urls)
+    print(f"  🔍 Companies found: {len(discovered_norms)}")
+    print(f"  🆕 New companies: {new_count}")
 
     # Save results
-    combined_urls = existing_urls.union(all_urls)
-    new_urls = all_urls - existing_urls
+    combined_urls = existing_urls.union(new_urls)
 
-    if new_urls:
-        print(f"\n🎉 Sample of new URLs (first 10):")
+    if new_count:
+        print("\n🎉 Sample of new URLs (first 10):")
         for url in sorted(new_urls)[:10]:
             print(f"  ✨ {url}")
-        if len(new_urls) > 10:
-            print(f"  ... and {len(new_urls) - 10} more")
+        if new_count > 10:
+            print(f"  ... and {new_count - 10} more")
 
-    df = pd.DataFrame({config["csv_column"]: sorted(combined_urls)})
+    sorted_urls = sorted(combined_urls)
+    df = pd.DataFrame({config["csv_column"]: sorted_urls})
     df.to_csv(config["output_file"], index=False)
 
     print(f"\n✅ Saved {len(df)} companies to {config['output_file']}")
@@ -433,7 +454,6 @@ def discover_all_platforms(
     print(f"📊 Queries per platform: {max_queries_per_platform}")
     print(f"📊 Pages per query: {pages_per_query}")
     print(f"🔧 Engines: {engines}")
-    print(f"💰 Cost: $0 (self-hosted, unlimited!)")
     print("=" * 80)
 
     for platform_name in PLATFORMS.keys():
@@ -449,7 +469,6 @@ def discover_all_platforms(
 
     print("\n" + "=" * 80)
     print("✅ All platforms discovered!")
-    print("💡 No API costs - run as often as you want!")
     print("=" * 80)
 
 
@@ -457,10 +476,11 @@ if __name__ == "__main__":
     import argparse
 
     parser = argparse.ArgumentParser(
-        description="SearXNG-based company discovery (FREE, self-hosted)"
+        description="SearXNG-based company discovery (self-hosted)"
     )
     parser.add_argument(
         "--platform",
+        type=str.lower,
         choices=list(PLATFORMS.keys()) + ["all"],
         default="all",
         help="Platform to discover (default: all)",

@@ -1,18 +1,18 @@
 # SearXNG Setup Guide
 
-Complete guide to setting up your own FREE, self-hosted search engine for unlimited company discovery.
+Complete guide to setting up your own self-hosted search engine for unlimited company discovery.
 
 ## What is SearXNG?
 
 **SearXNG** is a privacy-respecting metasearch engine that:
 - ✅ Aggregates results from **multiple search engines** (Google, DuckDuckGo, Bing, etc.)
-- ✅ **Completely FREE** - no API costs or limits
+- ✅ **No API limits** - unlimited queries
 - ✅ **Self-hosted** - you control everything
 - ✅ **No API keys** needed
 - ✅ **Privacy-focused** - no tracking
 - ✅ **JSON API** for programmatic access
 
-**Perfect for:** Unlimited company discovery at $0 cost!
+**Perfect for:** Unlimited company discovery with no restrictions!
 
 ---
 
@@ -99,7 +99,7 @@ echo "SEARXNG_URL=http://localhost:8080" >> .env
 # Test with one platform
 python searxng_discovery.py --platform ashby --max-queries 5
 
-# Run full discovery (unlimited, $0 cost!)
+# Run full discovery (unlimited queries!)
 python searxng_discovery.py --platform all --max-queries 20
 ```
 
@@ -460,51 +460,47 @@ docker system df
 
 ---
 
-## Cost Analysis
+## Comparison with Other Discovery Methods
 
-### SearXNG (Self-Hosted) vs Paid APIs
+### SearXNG (Self-Hosted) vs Other APIs
 
-| Service | Setup | Monthly Cost | Queries | Limits |
-|---------|-------|--------------|---------|--------|
-| **SearXNG (Self-hosted)** | 10 min | **$0** | Unlimited | None! |
-| **SearXNG (VPS)** | 30 min | **$5-10** | Unlimited | Server only |
-| SERP API | 0 min | $50 | 5,000 | API limits |
-| Google CSE | 5 min | $0 | 100/day | Daily limit |
-| Firecrawl | 5 min | $16 | 10,000 credits | Credit-based |
+| Service | Setup | Queries | Limits |
+|---------|-------|---------|--------|
+| **SearXNG (Self-hosted)** | 10 min | Unlimited | None! |
+| **SearXNG (VPS)** | 30 min | Unlimited | Server only |
+| SERP API | 0 min | 5,000 | API limits |
+| Google CSE | 5 min | 100/day | Daily limit |
+| Firecrawl | 5 min | 10,000 credits | Credit-based |
 
 ### Hosting Options
 
-**Localhost (Free):**
+**Localhost:**
 - Your own computer
-- $0/month
 - Good for: Development, testing, personal use
 
-**VPS (Cheap):**
+**VPS:**
 - DigitalOcean, Linode, Vultr, Hetzner
-- $5-10/month (smallest droplet)
 - Good for: Remote access, production, sharing
 
 **Free Tier Cloud:**
 - Oracle Cloud (Always Free tier)
-- Google Cloud ($300 free credit)
+- Google Cloud (free credit available)
 - AWS (12 months free)
-- $0/month (with limits)
 - Good for: Testing cloud deployment
 
 ### Recommended Setup
 
 **For Personal Use:**
 ```
-Localhost + Docker = $0/month, unlimited queries
+Localhost + Docker = unlimited queries, no restrictions
 ```
 
 **For Production:**
 ```
-$5 VPS + SearXNG = $5/month, unlimited queries
-(vs $50/month for SERP API with 5,000 query limit)
+VPS + SearXNG = unlimited queries, remote access
 ```
 
-**ROI:** Save $45-540/year!
+**Benefits:** No query limits, complete control, privacy-focused
 
 ---
 
@@ -629,22 +625,22 @@ python searxng_discovery.py --platform all --max-queries 100
 
 ### Expected Results
 
-| Queries | Pages | Expected Companies | Time | Cost |
-|---------|-------|-------------------|------|------|
-| 20 | 3 | 400-800 | 10 min | $0 |
-| 30 | 5 | 600-1,200 | 15 min | $0 |
-| 50 | 10 | 1,000-2,000 | 30 min | $0 |
-| 100 | 10 | 2,000-4,000 | 60 min | $0 |
+| Queries | Pages | Expected Companies | Time |
+|---------|-------|-------------------|------|
+| 20 | 3 | 400-800 | 10 min |
+| 30 | 5 | 600-1,200 | 15 min |
+| 50 | 10 | 1,000-2,000 | 30 min |
+| 100 | 10 | 2,000-4,000 | 60 min |
 
-**No limits, no costs - run as often as you want!**
+**No limits - run as often as you want!**
 
 ---
 
 ## FAQ
 
-### Q: How much does SearXNG cost?
+### Q: What are the costs for SearXNG?
 
-**A:** $0 if self-hosted on your computer. $5-10/month if you use a VPS for remote access. Either way, **unlimited queries at no additional cost!**
+**A:** If self-hosted on your computer, there are no additional costs. If you use a VPS for remote access, you'll need to cover VPS hosting. Either way, **unlimited queries with no per-query charges!**
 
 ### Q: Is it legal to self-host a search engine?
 
@@ -654,7 +650,6 @@ python searxng_discovery.py --platform all --max-queries 100
 
 | Feature | SearXNG | Google CSE |
 |---------|---------|------------|
-| Cost | $0 | $0 for 100/day |
 | Queries | Unlimited | 100/day limit |
 | Setup | 10 min | 5 min |
 | Privacy | Complete | Google tracks |
@@ -673,7 +668,7 @@ python searxng_discovery.py --platform all --max-queries 100
 **A:** No! SearXNG runs fine on:
 - Your laptop (localhost)
 - Raspberry Pi
-- $5/month VPS (1 vCPU, 1GB RAM)
+- Small VPS instances (1 vCPU, 1GB RAM)
 - Free tier cloud instances
 
 ### Q: What if my self-hosted instance goes down?
@@ -689,13 +684,13 @@ python searxng_discovery.py --platform all --max-queries 100
 
 ### Why Use SearXNG for Company Discovery?
 
-✅ **$0 cost** - completely free
-✅ **Unlimited queries** - no rate limits
+✅ **No query limits** - unlimited usage
 ✅ **No API keys** - self-hosted
 ✅ **Multiple search engines** - better coverage
 ✅ **Privacy-focused** - no tracking
 ✅ **Easy setup** - 10 minutes with Docker
 ✅ **Flexible** - run on laptop or VPS
+✅ **Complete control** - you own the infrastructure
 
 ### Quick Start Checklist
 
