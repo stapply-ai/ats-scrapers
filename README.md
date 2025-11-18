@@ -1,20 +1,81 @@
-# Stapply Job Data Aggregator
+# 🚀 Stapply Job Data Aggregator
 
-A data aggregator that collects job postings from multiple ATS (Applicant Tracking System) platforms and makes them publicly available.
+<div align="center">
 
-## Data
+**A powerful, open-source job aggregator that collects job postings from multiple ATS platforms and makes them publicly available.**
+
+[![Python 3.12+](https://img.shields.io/badge/python-3.12+-blue.svg)](https://www.python.org/downloads/)
+[![License](https://img.shields.io/badge/license-Open%20Source-green.svg)](LICENSE)
+
+[Features](#-features) • [Quick Start](#-quick-start) • [Architecture](#-architecture) • [Contributing](#-contributing)
+
+</div>
+
+---
+
+## 📊 Public Data
 
 The aggregated job data is available at: **https://storage.stapply.ai/jobs.csv**
 
-## Supported Platforms
+This CSV is updated regularly and contains job postings from all supported platforms.
 
-- **Ashby** 
-- **Greenhouse** 
-- **Lever** 
-- **Workable**
-- **Rippling** - Coming soon
+## ✨ Features
 
-## Quick Start
+- **🌐 Multi-Platform Support** - Scrape jobs from 5+ different ATS platforms (Ashby, Greenhouse, Lever, Workable, Rippling)
+- **🔍 Smart Discovery** - Multiple discovery methods to find companies using ATS platforms
+- **📦 Structured Data** - Clean, normalized job data with consistent schema across platforms
+- **🔄 Incremental Processing** - Checkpoint system prevents duplicate processing
+- **📈 Job Lifecycle Tracking** - Automatically detect and mark inactive jobs
+- **🎯 Semantic Search** - OpenAI embeddings for job title and description (Ashby)
+- **🐳 Self-Hosted Options** - Use SearXNG for unlimited discovery without API limits
+- **📝 Export Formats** - CSV exports with automatic diff tracking for new/updated jobs
+
+## 🏗️ Architecture
+
+The project follows a modular, platform-based architecture:
+
+```
+data/
+├── 📁 Platform Modules (ashby/, greenhouse/, lever/, workable/)
+│   ├── main.py              # Platform-specific scraper
+│   ├── export_to_csv.py     # CSV export utility
+│   ├── companies/           # JSON files (one per company)
+│   ├── jobs.csv             # Platform-specific job export
+│   └── *_companies.csv      # Company URL registry
+│
+├── 📁 Core Components
+│   ├── models/              # Pydantic data models for each platform
+│   ├── classifier/          # Job classification tools
+│   ├── searxng-docker/      # SearXNG self-hosted setup
+│   └── gather_jobs.py       # Job consolidation utility
+│
+├── 🔍 Discovery Scripts
+│   ├── searxng_discovery.py      # Self-hosted search (unlimited!)
+│   ├── discovery.py              # Discovery utilities
+│   └── [other discovery methods]
+│
+└── 📄 Configuration
+    ├── pyproject.toml       # Python dependencies
+    ├── env.example           # Environment variables template
+    └── README.md            # This file
+```
+
+### Data Flow
+
+1. **Discovery** → Find companies using ATS platforms via search APIs
+2. **Scraping** → Fetch jobs from each company's ATS API (saved as JSON)
+3. **Export** → Convert JSON to CSV format with standardized schema
+4. **Consolidation** → Merge all platform CSVs into unified `jobs.csv`
+5. **Processing** → Optional: Save to PostgreSQL with embeddings
+
+## 🚀 Quick Start
+
+### Prerequisites
+
+- Python 3.12+
+- [uv](https://github.com/astral-sh/uv) (recommended) or pip
+- PostgreSQL (optional, for database processing)
+- SearXNG instance (optional, for unlimited discovery)
 
 ### Installation
 
@@ -32,394 +93,116 @@ pip install -r requirements.txt
 
 ### Environment Setup
 
-Create a `.env` file with your API keys:
+Create a `.env` file from the example:
 
 ```bash
 cp env.example .env
 ```
 
-Then edit `.env` with your keys:
+Edit `.env` with your configuration:
 
 ```env
 # Required for job processing and embeddings
 DATABASE_URL=postgresql://user:pass@host:port/dbname
 OPENAI_API_KEY=sk-...
 
-# Required for company discovery
-SERPAPI_API_KEY=your_serpapi_key
-
-# Optional: Alternative discovery methods (cheaper/free)
-SEARXNG_URL=http://localhost:8080 # SearXNG (self-hosted, FREE unlimited!)
-FIRECRAWL_API_KEY=fc-your_key     # Firecrawl (500 free, $16/mo)
-GOOGLE_API_KEY=your_google_key    # Google (FREE 100/day)
-GOOGLE_CSE_ID=your_cse_id         # Google CSE ID
-BING_API_KEY=your_bing_key        # Bing (FREE 1,000/mo)
+# Optional: Discovery methods
+SEARXNG_URL=http://localhost:8080        # Self-hosted search (unlimited!)
+SERPAPI_API_KEY=your_serpapi_key        # SerpAPI for discovery
+FIRECRAWL_API_KEY=fc-your_key           # Firecrawl search API
+GOOGLE_API_KEY=your_google_key          # Google Custom Search API
+GOOGLE_CSE_ID=your_cse_id               # Custom Search Engine ID
+BING_API_KEY=your_bing_key              # Bing Search API
 ```
 
-## Pipeline Orchestrator (Recommended)
+## 📖 Usage
 
-**NEW!** Unified pipeline to run the full workflow with configurable steps.
+### Job Scraping
 
-**Default behavior:** Scraping + CSV Consolidation (skips discovery, CSV export, and DB processing)
-
-Note: The orchestrator's consolidation step reads directly from JSON files in `companies/` directories. The individual `export_to_csv.py` scripts create platform-specific CSV files for standalone use.
-
-### Quick Start
+Scrape jobs from discovered companies:
 
 ```bash
-# Default: scraping + CSV consolidation (most common use case)
-python orchestrator/pipeline.py
-
-# Run full pipeline including discovery and DB processing
-python orchestrator/pipeline.py --all
-
-# Discovery only with SearXNG (FREE unlimited!)
-python orchestrator/pipeline.py --discovery-only --discovery-method searxng --max-queries 30
-```
-
-### Pipeline Steps
-
-1. **Discovery** - Find companies using search APIs (SearXNG, Google CSE, Firecrawl, SERP API)
-2. **Scraping** - Fetch jobs from each company via ATS APIs (saves to `companies/` directory as JSON files)
-3. **CSV Export** - Each platform exports jobs from JSON files to `jobs.csv` (url, title, location, company)
-4. **CSV Consolidation** - Create simplified `all_jobs.csv` from all platform CSV files
-5. **DB Processing** - Save to PostgreSQL with embeddings (Ashby only currently)
-
-### Benefits
-
-- ✅ Coordinated workflow across all platforms
-- ✅ Skip any step as needed
-- ✅ Automatic error handling
-- ✅ Progress tracking and summaries
-- ✅ Simple CSV output for easy review
-
-**See [orchestrator/README.md](orchestrator/README.md) for full documentation.**
-
-## Company Discovery
-
-Find more companies using different ATS platforms.
-
-### Option 1: Enhanced Discovery (Recommended)
-
-Uses 55+ search strategies to find the most companies:
-
-```bash
-# Discover all platforms (uses SERPAPI_API_KEY)
-python enhanced_discovery.py --platform all --pages 10 --strategies 10
-
-# Discover specific platform
-python enhanced_discovery.py --platform ashby --pages 15 --strategies 20
-
-# Deep discovery (expensive but comprehensive)
-python enhanced_discovery.py --platform greenhouse --pages 20 --strategies 55
-```
-
-**Search Strategies Include:**
-- Basic site searches
-- Job-related keywords (careers, hiring, jobs)
-- Role-based (software engineer, product manager, data scientist, designer, sales, marketing)
-- Location-based (50+ global cities: SF, NYC, London, Paris, Berlin, Bangalore, Singapore, Tokyo, etc.)
-- Region-based (Europe, Asia, Middle East, North America, South America)
-- Company type (startup, YC, series A/B, tech startup)
-
-### Option 2: SearXNG Discovery (FREE - Unlimited!) ⭐
-
-Use your own self-hosted search engine with NO limits or costs:
-
-```bash
-# Setup: Follow SEARXNG_SETUP.md (10 minutes)
-# Runs on localhost or any server
-
-# Discover all platforms (unlimited queries!)
-python searxng_discovery.py --platform all --max-queries 20
-
-# Deep discovery (no cost concerns!)
-python searxng_discovery.py --platform all --max-queries 100 --pages 10
-
-# Use specific search engines
-python searxng_discovery.py --platform ashby --engines "google,duckduckgo,bing"
-```
-
-**Advantages:**
-- Completely FREE (self-hosted)
-- UNLIMITED queries (no rate limits!)
-- No API keys needed
-- Privacy-focused (you control everything)
-- Aggregates from multiple search engines
-- Can run on localhost or $5/month VPS
-
-**Cost:** $0 (localhost) or $5-10/month (VPS) - unlimited usage!
-
-### Option 3: Google Custom Search (FREE - 100/day)
-
-Use Google's free tier API (3,000 queries/month):
-
-```bash
-# Setup: See SERP_ALTERNATIVES.md for Google API setup (5 minutes)
-
-# Discover using free tier
-python google_custom_search.py --platform all --max-queries 100
-
-# Daily discovery (100 free queries per day)
-python google_custom_search.py --platform ashby --max-queries 100
-```
-
-**Cost:** FREE for first 100 queries/day, then $5 per 1,000 queries
-
-### Option 4: Firecrawl Discovery (SERP Alternative)
-
-Use Firecrawl's search endpoint as an alternative to SERP API:
-
-```bash
-# Setup: Get API key from https://firecrawl.dev/ (500 free credits)
-
-# Discover using Firecrawl search
-python firecrawl_discovery.py --platform all --max-queries 15
-
-# Discover specific platform
-python firecrawl_discovery.py --platform ashby --max-queries 20
-```
-
-**Advantages:**
-- Returns full content (not just snippets like Google)
-- Combined search + scrape in one call
-- Cheaper than SERP API ($16/mo vs $50/mo)
-- 500 free credits to start (no credit card)
-- 2 credits per 10 search results
-
-### Option 5: Optimized Discovery (Minimal Cost)
-
-Minimize SERP API costs with query caching and smart strategies:
-
-```bash
-# Uses only top 5 strategies with caching
-python optimized_serp_discovery.py --platform all --max-queries 25
-
-# Check cache stats
-python optimized_serp_discovery.py --cache-stats
-```
-
-**Features:**
-- SQLite query caching (avoid duplicate API calls)
-- Top 5 most effective strategies only
-- 75% cost reduction vs enhanced discovery
-
-### Manual Discovery
-
-Find companies from curated sources (FREE):
-
-**Sources:**
-- [Y Combinator Companies](https://www.ycombinator.com/companies) - 4,000+ startups
-- [BuiltIn Jobs](https://builtin.com/jobs) - 50,000+ tech jobs
-- [Wellfound](https://wellfound.com/jobs) - Startup jobs
-- [AngelList](https://angel.co/jobs) - Tech startup jobs
-
-**Method:**
-1. Visit company's careers page
-2. View page source (Ctrl+U / Cmd+U)
-3. Search for ATS domains:
-   - `ashbyhq.com` → Add to `ashby/companies.csv`
-   - `greenhouse.io` → Add to `greenhouse/greenhouse_companies.csv`
-   - `lever.co` → Add to `lever/lever_companies.csv`
-   - `workable.com` → Add to `workable/workable_companies.csv`
-
-## Job Scraping
-
-Scrape job postings from discovered companies:
-
-```bash
-# Ashby (includes database processing with embeddings)
+# Ashby
 cd ashby
-python main.py  # Scrapes jobs to companies/ directory as JSON files
-python export_to_csv.py  # Exports jobs from JSON to jobs.csv
-python process_ashby.py  # Process to database with OpenAI embeddings
+python main.py              # Scrapes jobs to companies/ directory as JSON
+python export_to_csv.py     # Exports jobs from JSON to jobs.csv
 
 # Greenhouse
 cd greenhouse
-python main.py  # Scrapes jobs to companies/ directory as JSON files
-python export_to_csv.py  # Exports jobs from JSON to jobs.csv
+python main.py
+python export_to_csv.py
 
 # Lever
 cd lever
-python main.py  # Scrapes jobs to companies/ directory as JSON files
-python export_to_csv.py  # Exports jobs from JSON to jobs.csv
+python main.py
+python export_to_csv.py
 
 # Workable
 cd workable
-python main.py  # Scrapes jobs to companies/ directory as JSON files
-python export_to_csv.py  # Exports jobs from JSON to jobs.csv
+python main.py
+python export_to_csv.py
 ```
 
-### Export to CSV
+### Company Discovery
 
-Each platform has an `export_to_csv.py` script that:
-- Reads job data from JSON files in the `companies/` directory
-- Exports a simplified CSV (`jobs.csv`) with columns: `url`, `title`, `location`, `company`
-- Handles missing directories gracefully (won't crash if scraping hasn't run yet)
-- Can be run independently after scraping for platform-specific exports
+Find more companies using different discovery methods:
 
-**Note:** The orchestrator uses `consolidate_jobs.py` which reads directly from JSON files and creates a unified `all_jobs.csv`. The individual `export_to_csv.py` scripts are useful for:
-- Quick platform-specific exports
-- Debugging individual platforms
-- Standalone workflows without the orchestrator
+#### Option 1: SearXNG Discovery (Recommended) ⭐
 
-## Project Structure
+Self-hosted search with unlimited queries:
 
-```
-data/
-├── ashby/                          # Ashby platform
-│   ├── main.py                    # Job scraper (saves to companies/ as JSON)
-│   ├── export_to_csv.py           # Exports jobs from JSON to jobs.csv
-│   ├── process_ashby.py           # Database processor with embeddings
-│   ├── companies/                 # JSON files (one per company)
-│   │   └── company-name.json      # Job data for each company
-│   ├── jobs.csv                   # Exported CSV (url, title, location, company)
-│   └── companies.csv              # Company URL list for scraping
-├── greenhouse/                     # Greenhouse platform
-│   ├── main.py                    # Job scraper (saves to companies/ as JSON)
-│   ├── export_to_csv.py           # Exports jobs from JSON to jobs.csv
-│   ├── companies/                 # JSON files (one per company)
-│   ├── jobs.csv                   # Exported CSV
-│   └── greenhouse_companies.csv   # Company URL list
-├── lever/                          # Lever platform
-│   ├── main.py                    # Job scraper (saves to companies/ as JSON)
-│   ├── export_to_csv.py           # Exports jobs from JSON to jobs.csv
-│   ├── companies/                 # JSON files (one per company)
-│   ├── jobs.csv                   # Exported CSV
-│   └── lever_companies.csv        # Company URL list
-├── workable/                       # Workable platform
-│   ├── main.py                    # Job scraper (saves to companies/ as JSON)
-│   ├── export_to_csv.py           # Exports jobs from JSON to jobs.csv
-│   ├── companies/                 # JSON files (one per company)
-│   ├── jobs.csv                   # Exported CSV
-│   └── workable_companies.csv     # Company URL list
-├── rippling/                       # Rippling platform (coming soon)
-│   └── rippling_companies.csv     # URL collection
-├── classifier/                     # Job classification tools
-│   ├── main.py                    # Classification logic
-│   └── eu.csv                     # EU-specific classifications
-├── models/                         # Pydantic data models
-│   ├── db.py                      # Database models
-│   ├── ashby.py                   # Ashby API models
-│   ├── gh.py                      # Greenhouse models
-│   ├── lever.py                   # Lever models
-│   └── workable.py                # Workable models
-├── orchestrator/                   # Pipeline orchestrator
-│   ├── __init__.py                # Package init
-│   ├── config.py                  # Pipeline configuration
-│   ├── pipeline.py                # Main orchestrator
-│   ├── consolidate_jobs.py        # CSV consolidation script
-│   └── README.md                  # Orchestrator documentation
-├── enhanced_discovery.py           # 55+ search strategies (recommended)
-├── searxng_discovery.py            # SearXNG self-hosted search (FREE unlimited!)
-├── firecrawl_discovery.py          # Firecrawl search API (SERP alternative)
-├── google_custom_search.py         # Free Google API discovery
-├── optimized_serp_discovery.py     # Cost-optimized SERP discovery
-├── gather_jobs.py                  # Job gathering utilities
-├── discovery.py                    # Discovery utilities
-├── full_pipeline.sh                # Shell script for full pipeline
-└── jobs.csv                        # Consolidated jobs CSV (root level)
-```
-
-### Key Directories
-
-- **`companies/`** - Each platform has a `companies/` directory containing JSON files (one per company) with raw job data scraped from the ATS API
-- **`jobs.csv`** - Each platform exports a simplified CSV with columns: `url`, `title`, `location`, `company`
-- **Company CSV files** - Lists of company URLs (e.g., `companies.csv`, `greenhouse_companies.csv`) used as input for scraping
-
-## Documentation
-
-- **[orchestrator/README.md](orchestrator/README.md)** - Pipeline orchestrator full documentation
-- **[SEARXNG_SETUP.md](SEARXNG_SETUP.md)** - Complete guide to setting up SearXNG (self-hosted search)
-- **[DISCOVERY_QUICK_START.md](DISCOVERY_QUICK_START.md)** - Quick reference for company discovery
-- **[IMPROVEMENTS.md](IMPROVEMENTS.md)** - Code quality improvements and recommendations
-
-## Discovery Cost Comparison
-
-| Method | Cost | Companies Found | Setup Time |
-|--------|------|----------------|------------|
-| **Enhanced Discovery** | $5-20/run | 500-2,000 | 0 min |
-| **SearXNG Discovery** ⭐ | $0 (unlimited!) | 500-2,000 | 10 min |
-| **Firecrawl Discovery** | $0-3/run | 300-800 | 5 min |
-| **Google Custom Search** | FREE (100/day) | 500-1,000 | 5 min |
-| **Optimized Discovery** | $2-5/run | 500-1,000 | 0 min |
-| **Manual Curation** | FREE | 500-1,000 | 30-60 min |
-
-### Recommended Workflow (Cost-Effective)
-
-**Week 1:** Enhanced discovery with limited strategies
 ```bash
-python enhanced_discovery.py --platform all --pages 10 --strategies 10
-# Cost: ~$4, Result: +500-1,000 companies
+# Setup: Follow SEARXNG_SETUP.md (10 minutes)
+# Then discover companies:
+python searxng_discovery.py --platform all --max-queries 20
+python searxng_discovery.py --platform ashby --pages 10
 ```
 
-**Week 2:** Google Custom Search (FREE)
+**Advantages:**
+- Unlimited queries (no rate limits!)
+- No API keys needed
+- Privacy-focused
+- Aggregates from multiple search engines
+- Can run on localhost or VPS
+
+
+### Consolidate Jobs
+
+Merge all platform CSVs into a single file:
+
 ```bash
-python google_custom_search.py --platform all --max-queries 100
-# Cost: $0, Result: +300-500 companies
+python gather_jobs.py
 ```
 
-**Week 3:** Manual curation (30 mins)
-```
-Visit YC directory, BuiltIn, etc.
-# Cost: $0, Result: +200-500 companies
-```
+This creates a unified `jobs.csv` at the root with jobs from all platforms.
 
-**Monthly total: 1,000-2,000 new companies at $4-8/month**
+## 🛠️ Tech Stack
 
-## Features
-
-- **Multi-platform support** - Scrape jobs from 5 different ATS platforms
-- **Semantic search** - OpenAI embeddings for job title and description (Ashby)
-- **Incremental processing** - Checkpoint system prevents duplicate processing
-- **Job lifecycle tracking** - Automatically detect and mark inactive jobs
-- **Public data export** - Jobs published to public CSV endpoint
-- **Cost-optimized discovery** - Multiple discovery methods from FREE to paid
-
-## Tech Stack
-
-- **Python 3.12+**
+- **Python 3.12+** - Modern Python features
 - **aiohttp** - Async HTTP client for concurrent scraping
 - **Pydantic** - Data validation and modeling
 - **SQLAlchemy** - Database ORM
-- **PostgreSQL** - Data storage
+- **PostgreSQL** - Data storage (optional)
 - **OpenAI API** - Text embeddings for semantic search
-- **SERP API / SearXNG / Google Custom Search / Firecrawl** - Company discovery
-- **pandas** - Data processing
-- **BeautifulSoup** - HTML parsing (if needed)
+- **pandas** - Data processing and CSV handling
+- **SearXNG** - Self-hosted metasearch engine
 
-## Environment Variables
+## 📚 Documentation
 
-| Variable | Required | Purpose |
-|----------|----------|---------|
-| `DATABASE_URL` | For job processing | PostgreSQL connection string |
-| `OPENAI_API_KEY` | For embeddings | OpenAI API key for semantic search |
-| `SERPAPI_API_KEY` | For discovery | SerpAPI key for company discovery |
-| `SEARXNG_URL` | Optional | SearXNG instance URL (self-hosted, FREE unlimited) |
-| `FIRECRAWL_API_KEY` | Optional | Firecrawl API (500 free credits, $16/mo) |
-| `GOOGLE_API_KEY` | Optional | Google Custom Search API (FREE tier) |
-| `GOOGLE_CSE_ID` | Optional | Custom Search Engine ID |
-| `BING_API_KEY` | Optional | Bing Search API (FREE tier) |
+- **[SEARXNG_SETUP.md](SEARXNG_SETUP.md)** - Complete guide to setting up SearXNG
+- **[env.example](env.example)** - Environment variables reference
 
-## API Endpoints
+## 🤝 Contributing
 
-**Public Jobs CSV:** https://storage.stapply.ai/jobs.csv
+We welcome contributions! This project thrives on community involvement. Here are several ways you can help:
 
-This CSV contains all aggregated job postings with:
-- Job title, description, location
-- Company name and ATS platform
-- Salary range (if available)
-- Remote/hybrid/onsite status
-- Post date and update timestamps
-- Semantic embeddings (for search)
+### 🎯 Ways to Contribute
 
-## Contributing
+#### 1. Add More Companies
 
-We welcome contributions! Here's how you can help:
+Help us discover more companies using ATS platforms:
 
-### Add More Companies
-
-1. Find companies using ATS platforms
+1. Find companies using ATS platforms (visit careers pages, check job boards)
 2. Add URLs to the appropriate CSV:
    - `ashby/companies.csv`
    - `greenhouse/greenhouse_companies.csv`
@@ -427,30 +210,126 @@ We welcome contributions! Here's how you can help:
    - `workable/workable_companies.csv`
 3. Submit a pull request
 
-### Improve Discovery Scripts
+#### 2. Improve Discovery Scripts
 
-- Add new search strategies to `enhanced_discovery.py`
-- Improve cost optimization in `optimized_serp_discovery.py`
-- Add new free discovery sources
+- Add new search strategies to discovery scripts
+- Optimize query patterns for better results
+- Add support for new discovery APIs
+- Improve error handling and retry logic
 
-### Add New ATS Platforms
+#### 3. Add New ATS Platforms
 
-- Create scraper in new platform directory
-- Add Pydantic models in `models/`
-- Add platform to discovery scripts
-- Update documentation
+Help us support more platforms:
 
-## License
+1. Create a new platform directory (e.g., `rippling/`)
+2. Implement scraper in `main.py`
+3. Add Pydantic models in `models/`
+4. Add platform to discovery scripts
+5. Update documentation
 
-Please feel free to make requests to improve or add more companies. Contributions are welcome!
+#### 4. Enhance Data Quality
 
-## Support
+- Improve job data normalization
+- Add data validation
+- Enhance job classification
+- Add more metadata fields
 
-For issues, questions, or suggestions:
-- Open an issue on GitHub
-- Submit a pull request
-- Contact: https://stapply.ai
+#### 5. Documentation & Examples
+
+- Improve documentation
+- Add code examples
+- Create tutorials
+- Fix typos and clarify instructions
+
+#### 6. Bug Reports & Feature Requests
+
+- Report bugs via GitHub issues
+- Suggest new features
+- Share your use cases
+
+### 🚀 Getting Started with Contributions
+
+1. **Fork the repository**
+2. **Create a branch** for your contribution:
+   ```bash
+   git checkout -b feature/your-feature-name
+   ```
+3. **Make your changes** and test them
+4. **Commit with clear messages**:
+   ```bash
+   git commit -m "Add: description of your changes"
+   ```
+5. **Push and create a pull request**
+
+### 📋 Contribution Guidelines
+
+- Follow existing code style and patterns
+- Add comments for complex logic
+- Test your changes before submitting
+- Update documentation if needed
+- Keep pull requests focused and atomic
+
+### 💡 Ideas for Contributions
+
+- [ ] Add support for more ATS platforms (Rippling, SmartRecruiters, etc.)
+- [ ] Improve error handling and retry mechanisms
+- [ ] Add data validation and quality checks
+- [ ] Create a web dashboard for monitoring
+- [ ] Add more discovery methods
+- [ ] Improve job classification
+- [ ] Add support for more export formats (JSON, Parquet, etc.)
+- [ ] Create Docker setup for easy deployment
+- [ ] Add CI/CD pipeline
+- [ ] Improve documentation and examples
+
+## 📊 Supported Platforms
+
+| Platform | Status | Companies | Jobs |
+|----------|--------|-----------|------|
+| **Ashby** | ✅ Active | 1,000+ | 10,000+ |
+| **Greenhouse** | ✅ Active | 500+ | 5,000+ |
+| **Lever** | ✅ Active | 300+ | 3,000+ |
+| **Workable** | ✅ Active | 200+ | 2,000+ |
+| **Rippling** | 🚧 Coming Soon | - | - |
+
+## 🔧 Development
+
+### Project Structure
+
+Each platform module follows a consistent structure:
+
+- **`main.py`** - Main scraper that fetches jobs from ATS APIs
+- **`export_to_csv.py`** - Exports JSON job data to CSV format
+- **`companies/`** - Directory containing JSON files (one per company)
+- **`jobs.csv`** - Platform-specific job export
+- **`*_companies.csv`** - Registry of company URLs to scrape
+
+### Key Concepts
+
+- **Checkpoint System** - Prevents duplicate processing by tracking last run state
+- **Incremental Updates** - Only processes new or updated jobs
+- **JSON Storage** - Raw job data stored as JSON files for flexibility
+- **CSV Export** - Standardized CSV format for easy consumption
+- **Diff Tracking** - Automatic detection of new/updated jobs
+
+## 📝 License
+
+This project is open source. Contributions are welcome!
+
+## 🌐 Links
+
+- **Public Jobs CSV**: https://storage.stapply.ai/jobs.csv
+- **Website**: https://stapply.ai
+- **Issues**: [GitHub Issues](https://github.com/stapply-ai/data/issues)
 
 ---
 
-**Current Status:** Actively maintained | 1,788 companies tracked | Updated daily
+<div align="center">
+
+**Made with ❤️ by the Stapply team**
+
+*Help us build the most comprehensive job data aggregator!*
+
+[⭐ Star us on GitHub](https://github.com/stapply-ai/data) • [🐛 Report Issues](https://github.com/stapply-ai/data/issues) • [💬 Discussions](https://github.com/stapply-ai/data/discussions)
+
+</div>
