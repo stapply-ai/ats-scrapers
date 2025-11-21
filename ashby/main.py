@@ -184,13 +184,13 @@ async def scrape_all_ashby_jobs(force: bool = False):
             if was_scraped:
                 successful_companies += 1
                 print(f"Successfully scraped {num_jobs} jobs from {company_slug}")
+                # Delay only if we scraped successfully
+                await asyncio.sleep(random.uniform(MIN_SCRAPE_DELAY, MAX_SCRAPE_DELAY))
             else:
                 skipped_companies += 1
         else:
             failed_companies += 1
             print(f"Failed to scrape {company_slug}")
-
-        await asyncio.sleep(random.uniform(MIN_SCRAPE_DELAY, MAX_SCRAPE_DELAY))
 
     print(
         f"\nDone! Processed {count} total jobs from {successful_companies} companies "
