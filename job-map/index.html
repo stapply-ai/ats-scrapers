@@ -1,55 +1,60 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    
-    <!-- Performance & Preconnect -->
-    <link rel="preconnect" href="https://api.mapbox.com" crossorigin />
-    <link rel="dns-prefetch" href="https://api.mapbox.com" />
-    
-    <!-- Primary Meta Tags -->
-    <title>Map of Jobs at Top AI Companies | Stapply Job Map</title>
-    <meta name="title" content="Map of Jobs at Top AI Companies | Stapply Job Map" />
-    <meta name="description" content="Interactive map of jobs at top AI companies including OpenAI, Anthropic, Mistral AI, DeepMind, Cohere, Hugging Face, Perplexity, Scale AI, Stability AI, and more. Explore AI job opportunities worldwide with real-time filtering by location, company, and role." />
-    <meta name="keywords" content="AI jobs map, jobs at top AI companies, OpenAI jobs, Anthropic jobs, Mistral AI jobs, DeepMind jobs, Cohere jobs, Hugging Face jobs, Perplexity jobs, Scale AI jobs, Stability AI jobs, AI company jobs, machine learning jobs, artificial intelligence careers, AI job search, tech jobs map, software engineer jobs, data scientist jobs, AI research jobs, LLM jobs" />
-    <meta name="author" content="Stapply" />
-    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
-    <meta name="language" content="English" />
-    <meta name="revisit-after" content="7 days" />
-    
-    <!-- Canonical URL -->
-    <link rel="canonical" href="https://map.stapply.ai" />
-    
-    <!-- Open Graph / Facebook -->
-    <meta property="og:type" content="website" />
-    <meta property="og:url" content="https://map.stapply.ai" />
-    <meta property="og:title" content="Map of Jobs at Top AI Companies | Stapply Job Map" />
-    <meta property="og:description" content="Explore jobs at top AI companies like OpenAI, Anthropic, Mistral AI, DeepMind, Cohere, Hugging Face, and more. Interactive map with real-time filtering by location, company, and role." />
-    <meta property="og:image" content="https://stapply.ai/og-image.png" />
-    <meta property="og:image:width" content="1200" />
-    <meta property="og:image:height" content="630" />
-    <meta property="og:image:alt" content="Map of jobs at top AI companies worldwide" />
-    <meta property="og:site_name" content="Stapply" />
-    <meta property="og:locale" content="en_US" />
-    
-    <!-- Twitter -->
-    <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:url" content="https://map.stapply.ai" />
-    <meta name="twitter:title" content="Map of Jobs at Top AI Companies | Stapply Job Map" />
-    <meta name="twitter:description" content="Explore jobs at top AI companies like OpenAI, Anthropic, Mistral AI, DeepMind, Cohere, Hugging Face, and more. Interactive map with real-time filtering." />
-    <meta name="twitter:image" content="https://stapply.ai/og-image.png" />
-    <meta name="twitter:image:alt" content="Map of jobs at top AI companies worldwide" />
-    
-    <!-- Theme Color -->
-    <meta name="theme-color" content="#3b82f6" />
-    
-    <!-- Apple Touch Icon -->
-    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
-    
-    <!-- Structured Data (JSON-LD) -->
-    <script type="application/ld+json">
+
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- Performance & Preconnect -->
+  <link rel="preconnect" href="https://api.mapbox.com" crossorigin />
+  <link rel="dns-prefetch" href="https://api.mapbox.com" />
+
+  <!-- Primary Meta Tags -->
+  <title>Jobs at Top AI Companies | Stapply </title>
+  <meta name="title" content="Jobs at Top AI Companies | Stapply" />
+  <meta name="description"
+    content="Interactive map of jobs at top AI companies including OpenAI, Anthropic, Mistral AI, DeepMind, Cohere, Hugging Face, Perplexity, Scale AI, Stability AI, and more. Explore AI job opportunities worldwide with real-time filtering by location, company, and role." />
+  <meta name="keywords"
+    content="AI jobs map, jobs at top AI companies, OpenAI jobs, Anthropic jobs, Mistral AI jobs, DeepMind jobs, Cohere jobs, Hugging Face jobs, Perplexity jobs, Scale AI jobs, Stability AI jobs, AI company jobs, machine learning jobs, artificial intelligence careers, AI job search, tech jobs map, software engineer jobs, data scientist jobs, AI research jobs, LLM jobs" />
+  <meta name="author" content="Stapply" />
+  <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
+  <meta name="language" content="English" />
+  <meta name="revisit-after" content="7 days" />
+
+  <!-- Canonical URL -->
+  <link rel="canonical" href="https://map.stapply.ai" />
+
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://map.stapply.ai" />
+  <meta property="og:title" content="Map of Jobs at Top AI Companies | Stapply Job Map" />
+  <meta property="og:description"
+    content="Explore jobs at top AI companies like OpenAI, Anthropic, Mistral AI, DeepMind, Cohere, Hugging Face, and more. Interactive map with real-time filtering by location, company, and role." />
+  <meta property="og:image" content="https://stapply.ai/og-image.png" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta property="og:image:alt" content="Map of jobs at top AI companies worldwide" />
+  <meta property="og:site_name" content="Stapply" />
+  <meta property="og:locale" content="en_US" />
+
+  <!-- Twitter -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:url" content="https://map.stapply.ai" />
+  <meta name="twitter:title" content="Map of Jobs at Top AI Companies | Stapply Job Map" />
+  <meta name="twitter:description"
+    content="Explore jobs at top AI companies like OpenAI, Anthropic, Mistral AI, DeepMind, Cohere, Hugging Face, and more. Interactive map with real-time filtering." />
+  <meta name="twitter:image" content="https://stapply.ai/og-image.png" />
+  <meta name="twitter:image:alt" content="Map of jobs at top AI companies worldwide" />
+
+  <!-- Theme Color -->
+  <meta name="theme-color" content="#3b82f6" />
+
+  <!-- Apple Touch Icon -->
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+
+  <!-- Structured Data (JSON-LD) -->
+  <script type="application/ld+json">
     {
       "@context": "https://schema.org",
       "@type": "WebApplication",
@@ -100,9 +105,9 @@
       }
     }
     </script>
-    
-    <!-- Additional Structured Data for JobPosting -->
-    <script type="application/ld+json">
+
+  <!-- Additional Structured Data for JobPosting -->
+  <script type="application/ld+json">
     {
       "@context": "https://schema.org",
       "@type": "ItemList",
@@ -137,9 +142,11 @@
       ]
     }
     </script>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
-  </body>
+</head>
+
+<body>
+  <div id="root"></div>
+  <script type="module" src="/src/main.tsx"></script>
+</body>
+
 </html>

@@ -1,11 +1,3 @@
-import { useEffect } from 'react';
-
-interface LoadingScreenProps {
-  stage: string;
-  current?: number;
-  total?: number;
-}
-
 export function LoadingScreen() {
 
 
