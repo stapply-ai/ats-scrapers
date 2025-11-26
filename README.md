@@ -1,8 +1,8 @@
-# 🚀 Stapply Job Data Aggregator
+# 🚀 Stapply Map
 
 <div align="center">
 
-**A powerful, open-source job aggregator that collects job postings from multiple ATS platforms and makes them publicly available.**
+**An open-source map of the jobs**
 
 </div>
 
