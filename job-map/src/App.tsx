@@ -83,6 +83,10 @@ function App() {
     setFilteredJobs(filtered.length < jobMarkers.length ? filtered : null);
   }, [jobMarkers]);
 
+  const toggleJobList = useCallback(() => {
+    setIsJobListOpen((prev) => !prev);
+  }, []);
+
   const handleJobClick = useCallback((job: JobMarker) => {
     if (mapControlCallbacksRef.current) {
       // Fly to the job location and zoom in
@@ -162,7 +166,7 @@ function App() {
         filteredJobs={filteredJobs}
         onViewStateChange={handleViewStateChange}
         onOpenFilters={() => setIsFilterDialogOpen(true)}
-        onOpenJobList={() => setIsJobListOpen(true)}
+        onOpenJobList={toggleJobList}
       />
       {showChat && (
         <ChatInterface

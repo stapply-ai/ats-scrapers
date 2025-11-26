@@ -198,7 +198,11 @@ export function FilterDialog({ isOpen, onClose, jobs, onApplyFilters }: FilterDi
                 </label>
                 <button
                   onClick={handleSelectAllCompanies}
-                  className="text-[11px] text-blue-400 hover:text-blue-300 transition-colors border-none bg-transparent cursor-pointer"
+                  className={clsx(
+                    'text-[11px] text-white/70 border-none bg-transparent cursor-pointer',
+                    'transition-colors duration-200',
+                    'hover:text-white'
+                  )}
                 >
                   {selectedCompanies.size === filteredCompanies.length ? 'Deselect All' : 'Select All'}
                 </button>
@@ -271,7 +275,11 @@ export function FilterDialog({ isOpen, onClose, jobs, onApplyFilters }: FilterDi
                 </label>
                 <button
                   onClick={handleSelectAllLocations}
-                  className="text-[11px] text-blue-400 hover:text-blue-300 transition-colors border-none bg-transparent cursor-pointer"
+                  className={clsx(
+                    'text-[11px] text-white/70 border-none bg-transparent cursor-pointer',
+                    'transition-colors duration-200',
+                    'hover:text-white'
+                  )}
                 >
                   {selectedLocations.size === filteredLocations.length ? 'Deselect All' : 'Select All'}
                 </button>
@@ -343,10 +351,10 @@ export function FilterDialog({ isOpen, onClose, jobs, onApplyFilters }: FilterDi
           <button
             onClick={handleReset}
             className={clsx(
-              'px-4 py-2 rounded-lg',
+              'px-[10px] py-1 rounded-full',
               'bg-white/8 border border-white/12',
-              'text-white text-[13px] font-medium',
-              'hover:bg-white/12 transition-all duration-150 cursor-pointer'
+              'text-white text-[11px] font-medium',
+              'hover:bg-white/12 hover:border-white/20 transition-[border-color,background-color] duration-200 cursor-pointer'
             )}
           >
             Reset All
@@ -355,10 +363,10 @@ export function FilterDialog({ isOpen, onClose, jobs, onApplyFilters }: FilterDi
             <button
               onClick={onClose}
               className={clsx(
-                'px-4 py-2 rounded-lg',
+                'px-[10px] py-1 rounded-full',
                 'bg-white/8 border border-white/12',
-                'text-white text-[13px] font-medium',
-                'hover:bg-white/12 transition-all duration-150 cursor-pointer'
+                'text-white text-[11px] font-medium',
+                'hover:bg-white/12 hover:border-white/20 transition-[border-color,background-color] duration-200 cursor-pointer'
               )}
             >
               Cancel
@@ -366,10 +374,10 @@ export function FilterDialog({ isOpen, onClose, jobs, onApplyFilters }: FilterDi
             <button
               onClick={handleApply}
               className={clsx(
-                'px-5 py-2 rounded-lg',
-                'bg-blue-500 border-none',
-                'text-white text-[13px] font-medium',
-                'hover:bg-blue-600 transition-all duration-150 cursor-pointer'
+                'px-[10px] py-1 rounded-full',
+                'bg-white/12 border border-white/20',
+                'text-white text-[11px] font-medium',
+                'hover:bg-white/16 hover:border-white/30 transition-[border-color,background-color] duration-200 cursor-pointer'
               )}
             >
               Apply Filters

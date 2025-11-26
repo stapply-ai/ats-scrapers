@@ -119,7 +119,7 @@ export function StatsOverlay({ totalJobs, displayedJobs, totalLocations, popupOp
       </div>
       {/* Action Buttons */}
       {(onOpenFilters || onOpenJobList) && (
-        <div className="mt-3 pt-3 border-t border-white/8 flex gap-2 justify-center flex-wrap">
+        <div className="mt-3 pt-3 border-t border-white/8 flex gap-2">
           {onOpenFilters && (
             <button
               onClick={(e) => {
@@ -127,10 +127,10 @@ export function StatsOverlay({ totalJobs, displayedJobs, totalLocations, popupOp
                 onOpenFilters();
               }}
               className={clsx(
-                'text-white no-underline',
+                'text-white no-underline flex-1',
                 'bg-white/8 px-[10px] py-1 rounded-full',
                 'border border-white/12',
-                'text-[11px] inline-flex items-center gap-1.5',
+                'text-[11px] inline-flex items-center justify-center gap-1.5',
                 'transition-[border-color,background-color] duration-200 ease-in-out',
                 'hover:bg-white/12 hover:border-white/20',
                 'cursor-pointer relative'
@@ -149,10 +149,10 @@ export function StatsOverlay({ totalJobs, displayedJobs, totalLocations, popupOp
                 onOpenJobList();
               }}
               className={clsx(
-                'text-white no-underline',
+                'text-white no-underline flex-1',
                 'bg-white/8 px-[10px] py-1 rounded-full',
                 'border border-white/12',
-                'text-[11px] inline-flex items-center gap-1.5',
+                'text-[11px] inline-flex items-center justify-center gap-1.5',
                 'transition-[border-color,background-color] duration-200 ease-in-out',
                 'hover:bg-white/12 hover:border-white/20',
                 'cursor-pointer'
