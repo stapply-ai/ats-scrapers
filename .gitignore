@@ -31,3 +31,4 @@ logs/
 **/jobs_diff_*.csv
 
 job-map/public/jobs.csv
+map
