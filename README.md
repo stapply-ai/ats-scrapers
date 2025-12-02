@@ -14,7 +14,7 @@ We built a map of the jobs:
 
 - [Explore the interactive job map](https://map.stapply.ai)
 
-![Preview of the Stapply job map](job-map/public/opengraph-image.jpeg)
+![Preview of the Stapply job map](map/public/opengraph-image.jpeg)
 
 
 ## 📊 Public Data
