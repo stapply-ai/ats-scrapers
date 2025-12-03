@@ -150,15 +150,10 @@ def main() -> None:
             f.write("\n")
         out_files.append(out_path)
 
-    print(
-        f"✅ Prepared {len(threads)} {prefix} thread file(s) "
-        f"with NEW listings only:"
-    )
+    print(f"✅ Prepared {len(threads)} {prefix} thread file(s) with NEW listings only:")
     for p in out_files:
         print(f" - {p.name}")
 
 
 if __name__ == "__main__":
     main()
-
-

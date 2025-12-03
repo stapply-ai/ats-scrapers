@@ -72,9 +72,9 @@ def build_url_to_posted_at_map() -> Dict[str, str]:
             return
         # Keep the earliest timestamp if there is a conflict
         try:
-            if datetime.fromisoformat(iso_ts.replace("Z", "+00:00")) < datetime.fromisoformat(
-                existing.replace("Z", "+00:00")
-            ):
+            if datetime.fromisoformat(
+                iso_ts.replace("Z", "+00:00")
+            ) < datetime.fromisoformat(existing.replace("Z", "+00:00")):
                 url_to_posted[url] = iso_ts
         except Exception:
             # If comparison fails, just keep the existing one
@@ -88,7 +88,10 @@ def build_url_to_posted_at_map() -> Dict[str, str]:
                 with open(path, "r", encoding="utf-8") as f:
                     data = json.load(f)
             except Exception as e:
-                print(f"Warning: failed to read Ashby file {path.name}: {e}", file=sys.stderr)
+                print(
+                    f"Warning: failed to read Ashby file {path.name}: {e}",
+                    file=sys.stderr,
+                )
                 continue
 
             for job in data.get("jobs", []):
@@ -106,7 +109,8 @@ def build_url_to_posted_at_map() -> Dict[str, str]:
                     data = json.load(f)
             except Exception as e:
                 print(
-                    f"Warning: failed to read Greenhouse file {path.name}: {e}", file=sys.stderr
+                    f"Warning: failed to read Greenhouse file {path.name}: {e}",
+                    file=sys.stderr,
                 )
                 continue
 
@@ -124,7 +128,10 @@ def build_url_to_posted_at_map() -> Dict[str, str]:
                 with open(path, "r", encoding="utf-8") as f:
                     data = json.load(f)
             except Exception as e:
-                print(f"Warning: failed to read Lever file {path.name}: {e}", file=sys.stderr)
+                print(
+                    f"Warning: failed to read Lever file {path.name}: {e}",
+                    file=sys.stderr,
+                )
                 continue
 
             if isinstance(data, list):
@@ -138,7 +145,9 @@ def build_url_to_posted_at_map() -> Dict[str, str]:
                 iso_ts: Optional[str] = None
                 if isinstance(created_at, (int, float)):
                     try:
-                        dt = datetime.fromtimestamp(created_at / 1000.0, tz=timezone.utc)
+                        dt = datetime.fromtimestamp(
+                            created_at / 1000.0, tz=timezone.utc
+                        )
                         iso_ts = _to_utc_iso(dt)
                     except Exception:
                         iso_ts = None
@@ -155,7 +164,8 @@ def build_url_to_posted_at_map() -> Dict[str, str]:
                     data = json.load(f)
             except Exception as e:
                 print(
-                    f"Warning: failed to read Rippling file {path.name}: {e}", file=sys.stderr
+                    f"Warning: failed to read Rippling file {path.name}: {e}",
+                    file=sys.stderr,
                 )
                 continue
 
@@ -175,11 +185,16 @@ def build_url_to_posted_at_map() -> Dict[str, str]:
                     data = json.load(f)
             except Exception as e:
                 print(
-                    f"Warning: failed to read Workable file {path.name}: {e}", file=sys.stderr
+                    f"Warning: failed to read Workable file {path.name}: {e}",
+                    file=sys.stderr,
                 )
                 continue
 
-            job_list = data if isinstance(data, list) else data.get("jobs") or data.get("results") or []
+            job_list = (
+                data
+                if isinstance(data, list)
+                else data.get("jobs") or data.get("results") or []
+            )
             for job in job_list:
                 url = job.get("url") or job.get("application_url")
                 published_on = job.get("published_on")
@@ -247,5 +262,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-
-
