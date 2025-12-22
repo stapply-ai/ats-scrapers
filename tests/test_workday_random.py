@@ -64,6 +64,7 @@ class WorkdayRandomCompanyTest(unittest.TestCase):
         self.assertEqual(data.get("url"), company.url)
         self.assertEqual(data.get("job_count"), job_count)
         self.assertIn("jobs", data)
+        self.assertIn("status", data)
 
 
 if __name__ == "__main__":

@@ -7,7 +7,7 @@ import random
 import time
 from dataclasses import dataclass
 from datetime import datetime
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Tuple
 from urllib.parse import parse_qsl, urljoin, urlparse, urlencode, urlunparse
 
 import aiohttp
@@ -22,11 +22,12 @@ MAX_PAGES = 200
 MAX_CONCURRENT_DETAIL_REQUESTS = 8
 REQUEST_TIMEOUT = ClientTimeout(total=45)
 USER_AGENT = (
-    "Mozilla/5.0 (Macintosh; Intel Mac OS X 14_0) "
+    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
     "AppleWebKit/537.36 (KHTML, like Gecko) "
-    "Chrome/121.0.0.0 Safari/537.36"
+    "Chrome/143.0.0.0 Safari/537.36"
 )
 HEADERS = {"User-Agent": USER_AGENT, "Accept-Language": "en-US,en;q=0.9"}
+CACHE_HOURS = 24
 
 
 @dataclass(slots=True)
@@ -55,22 +56,26 @@ def load_company_data(file_path: str) -> Optional[Dict[str, Any]]:
         return None
 
 
-def should_scrape(company_data: Optional[Dict[str, Any]], force: bool) -> tuple[bool, Optional[float]]:
+def should_scrape(
+    company_data: Optional[Dict[str, Any]], force: bool, min_hours: int = CACHE_HOURS
+) -> tuple[bool, Optional[float]]:
     if force or not company_data:
         return True, None
-    ts = company_data.get("last_scraped")
+    ts = company_data.get("last_request") or company_data.get("last_scraped")
     if not ts:
         return True, None
     try:
         last = datetime.fromisoformat(ts)
         hours = (datetime.now() - last).total_seconds() / 3600
-        return hours >= 12, hours
+        return hours >= min_hours, hours
     except (ValueError, TypeError):
         return True, None
 
 
 def save_company_data(file_path: str, payload: Dict[str, Any]) -> None:
-    payload["last_scraped"] = datetime.now().isoformat()
+    now = datetime.now().isoformat()
+    payload["last_scraped"] = now
+    payload["last_request"] = now
     with open(file_path, "w", encoding="utf-8") as fh:
         json.dump(payload, fh, indent=2)
 
@@ -105,25 +110,33 @@ class WorkdayScraper:
         self.force = force
         self.semaphore = asyncio.Semaphore(MAX_CONCURRENT_DETAIL_REQUESTS)
 
-    async def _fetch(self, session: ClientSession, url: str) -> Optional[str]:
+    async def _fetch(self, session: ClientSession, url: str) -> Tuple[Optional[str], Optional[int]]:
         attempt = 1
         while attempt <= MAX_RETRIES:
             try:
                 async with session.get(url, timeout=REQUEST_TIMEOUT) as resp:
-                    if resp.status == 404:
+                    status = resp.status
+                    if status == 500:
+                        print(f"Received 500 for {url}; not retrying")
+                        return None, status
+                    if status == 404:
                         print(f"Received 404 for {url}")
-                        return None
+                        return None, status
                     resp.raise_for_status()
-                    return await resp.text()
+                    return await resp.text(), status
             except (ClientResponseError, aiohttp.ClientError) as err:
+                status = getattr(err, "status", None)
+                if status == 500:
+                    print(f"Error fetching {url} ({err}). Not retrying due to 500 status")
+                    return None, status
                 if attempt == MAX_RETRIES:
                     print(f"Failed to fetch {url}: {err}")
-                    return None
+                    return None, status
                 backoff = BASE_RETRY_DELAY * attempt + random.uniform(0, 1)
                 print(f"Error fetching {url} ({err}). Retrying in {backoff:.1f}s...")
                 await asyncio.sleep(backoff)
                 attempt += 1
-        return None
+        return None, None
 
     def _parse_index_page(self, html: str, base_url: str, page_number: int) -> List[Dict[str, Any]]:
         soup = BeautifulSoup(html, "html.parser")
@@ -166,13 +179,18 @@ class WorkdayScraper:
             )
         return results
 
-    async def _fetch_job_list(self, session: ClientSession, base_url: str) -> List[Dict[str, Any]]:
+    async def _fetch_job_list(
+        self, session: ClientSession, base_url: str
+    ) -> Tuple[List[Dict[str, Any]], Optional[int]]:
         all_jobs: List[Dict[str, Any]] = []
         seen_urls: set[str] = set()
         page = 1
+        last_status: Optional[int] = None
         while page <= MAX_PAGES:
             page_url = base_url if page == 1 else set_query_param(base_url, page=page)
-            html = await self._fetch(session, page_url)
+            html, status = await self._fetch(session, page_url)
+            if status is not None:
+                last_status = status
             if not html:
                 break
             parsed = self._parse_index_page(html, base_url, page)
@@ -184,7 +202,7 @@ class WorkdayScraper:
             all_jobs.extend(new_jobs)
             print(f"Found {len(new_jobs)} jobs on page {page} ({base_url})")
             page += 1
-        return all_jobs
+        return all_jobs, last_status
 
     def _parse_detail_page(self, html: str) -> Dict[str, Any]:
         soup = BeautifulSoup(html, "html.parser")
@@ -218,11 +236,14 @@ class WorkdayScraper:
             "apply_url": apply_link.get("href") if apply_link else None,
         }
 
-    async def _fetch_job_detail(self, session: ClientSession, job: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+    async def _fetch_job_detail(
+        self, session: ClientSession, job: Dict[str, Any]
+    ) -> Optional[Dict[str, Any]]:
         async with self.semaphore:
-            html = await self._fetch(session, job["job_url"])
+            html, status = await self._fetch(session, job["job_url"])
         if not html:
-            print(f"Skipping detail for {job['job_url']} (no HTML)")
+            status_text = status if status is not None else "unknown"
+            print(f"Skipping detail for {job['job_url']} (status {status_text})")
             return None
         detail = self._parse_detail_page(html)
         job_id = detail.get("job_requisition_id") or job.get("job_id_hint")
@@ -246,7 +267,8 @@ class WorkdayScraper:
             return cached_jobs, False
 
         print(f"Fetching job index for {company.name} ({company.url})")
-        jobs = await self._fetch_job_list(session, company.url)
+        jobs, status_code = await self._fetch_job_list(session, company.url)
+        normalized_status = status_code if status_code is not None else 0
         if not jobs:
             print(f"No jobs found for {company.name}; caching empty result")
             payload = {
@@ -255,6 +277,7 @@ class WorkdayScraper:
                 "slug": company.slug,
                 "job_count": 0,
                 "jobs": [],
+                "status": normalized_status,
             }
             os.makedirs(companies_dir, exist_ok=True)
             save_company_data(file_path, payload)
@@ -270,6 +293,7 @@ class WorkdayScraper:
             "slug": company.slug,
             "job_count": len(details),
             "jobs": details,
+            "status": normalized_status,
         }
         os.makedirs(companies_dir, exist_ok=True)
         save_company_data(file_path, payload)
