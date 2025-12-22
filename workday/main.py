@@ -248,7 +248,16 @@ class WorkdayScraper:
         print(f"Fetching job index for {company.name} ({company.url})")
         jobs = await self._fetch_job_list(session, company.url)
         if not jobs:
-            print(f"No jobs found for {company.name}")
+            print(f"No jobs found for {company.name}; caching empty result")
+            payload = {
+                "company": company.name,
+                "url": company.url,
+                "slug": company.slug,
+                "job_count": 0,
+                "jobs": [],
+            }
+            os.makedirs(companies_dir, exist_ok=True)
+            save_company_data(file_path, payload)
             return 0, True
 
         detail_tasks = [self._fetch_job_detail(session, job) for job in jobs]
