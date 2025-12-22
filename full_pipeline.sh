@@ -27,6 +27,11 @@ run_workable() {
   "$PYTHON" "$PROJECT_ROOT/workable/export_to_csv.py"
 }
 
+run_workday() {
+  "$PYTHON" "$PROJECT_ROOT/workday/main.py"
+  "$PYTHON" "$PROJECT_ROOT/workday/export_to_csv.py"
+}
+
 run_ai() {
   "$PYTHON" "$PROJECT_ROOT/ai.py"
   cd "$PROJECT_ROOT/map"
@@ -52,6 +57,9 @@ case "$JOB" in
   workable)
     run_workable
     ;;
+  workday)
+    run_workday
+    ;;
   ai)
     run_ai
     ;;
@@ -60,6 +68,7 @@ case "$JOB" in
     run_greenhouse
     run_lever
     run_workable
+    run_workday
     run_ai
     ;;
   *)
