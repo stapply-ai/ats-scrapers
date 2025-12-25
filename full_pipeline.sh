@@ -301,6 +301,11 @@ run_workday() {
   "$PYTHON" "$PROJECT_ROOT/workday/export_to_csv.py"
 }
 
+run_google() {
+  "$PYTHON" "$PROJECT_ROOT/google/main.py"
+  "$PYTHON" "$PROJECT_ROOT/google/export_to_csv.py"
+}
+
 run_ai() {
   local msg="[run_ai] Starting AI pipeline at $(date '+%Y-%m-%d %H:%M:%S')..."
   {
@@ -437,6 +442,9 @@ case "$JOB" in
     ;;
   workday)
     run_workday
+    ;;
+  google)
+    run_google
     ;;
   ai)
     if ! run_ai; then
