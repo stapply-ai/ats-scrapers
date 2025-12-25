@@ -39,3 +39,11 @@ full_pipeline.sh
 posted_jobs.json
 hourly_thread.txt
 daily_thread.txt
+map/**
+.DS_Store
+
+**/*.txt
+**/*.json
+**/*.html
+**/jobs_old.csv
+rm_ai.csv
